@@ -1,0 +1,315 @@
+#Import libraries
+%matplotlib inline
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+#Load the dataset to a variable voice
+voice = pd.read_csv('voice.csv')
+voice
+#Prints the summary of voice
+voice.info()
+#Preprocessing Step 1:
+#Check voice has any null values or not
+voice.isnull().values.any() 
+import seaborn as sns
+# Create the pairplot
+sns.pairplot(voice)
+#Apply correlation to data to check relation between different columns
+correlation = voice.corr()
+correlation
+voice.boxplot(column= 'meanfreq', by='label', grid=False)
+#Prints the features in voice
+print('Features: \n', voice.keys())
+#Prints the number of males and females in voice
+print('Number of Males:',voice[voice['label']=='male'].shape[0])
+print('Number of Femles:',voice[voice['label']=='female'].shape[0])
+def PlotFeatures(Func,f):
+    
+    #Starting index of features
+    i=0  
+    #Starting index of color
+    j=0   
+    #Colors for plots
+    color = ['r','b','y','g','darkblue','lightgreen','purple','k','orange','olive','c'] 
+    
+    # Number of rows
+    noOfRows =5
+    
+    # Creating Figure and Axis to plot 
+    figure, axes = plt.subplots(noOfRows,2)
+    
+    # Setting Figure size
+    figure.set_figheight(20)
+    figure.set_figwidth(20)
+    
+    for row in axes:
+        
+        plot1 = Func[f[i]]
+        plot2 = Func[f[i+3]]
+        
+        col = [color[j],color[j+1]]
+        label = [f[i],f[i+1]]
+        
+        plot(row, plot1,plot2,col,label)
+        
+        i=i+4
+        
+        j=j+2
+        
+    plt.show()
+def plot(axrow, plot1, plot2, col, label):
+    
+    axrow[0].plot(plot1,label=label[0],color=col[0])
+    axrow[0].legend()
+    
+    axrow[1].plot(plot2,label=label[1],color=col[1])
+    axrow[1].legend()
+# Setting Male Acoustic Parameters
+Male = voice[voice['label']=='male']
+Male = Male.drop(['label'],axis=1)
+features = Male.keys()
+PlotFeatures(Male,features)
+Female = voice[voice['label']=='female']
+Female = Female.drop(['label'],axis=1)
+features = Female.keys()
+PlotFeatures(Female,features)
+#Training data drop label column
+trainData = voice.drop(['label'],axis=1)
+#Target Data has label column
+target = voice['label'] 
+trainData
+#Encode label {'male':1, 'female':0} 
+from sklearn.preprocessing import LabelEncoder
+labelEncoder = LabelEncoder()
+#Fit Y in Label_Encoder for Encoding 
+labelEncoder.fit(target)
+#Transforming Data to {'male':1, 'female':0}
+targetEncoded = labelEncoder.transform(target)
+targetEncoded
+#Preprocessing Step 2
+#Standardize and scale the data
+from sklearn import preprocessing
+trainDataScale = preprocessing.scale(trainData)
+#Preprocessing Step 3
+#Perform Principal Component Analysis for testing 
+#Model doesnot include its results
+from sklearn.decomposition import PCA
+pca = PCA(n_components=20)
+principalComponents = pca.fit_transform(trainDataScale)
+trainDataScaled = pd.DataFrame(data = principalComponents)
+seed = 31
+#Split data into Test and Train dataset
+from sklearn.model_selection import train_test_split
+X_train,X_test,Y_train,Y_test = train_test_split(trainDataScaled,targetEncoded,test_size = 0.25, random_state=123)
+print('Classification Techniques :')
+#Classification Technique 1
+print('Classification Technique 1 : ')
+#Create the classifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+ClassifierKNN = KNeighborsClassifier()
+#Train the classifier 
+ClassifierKNN.fit(X_train,Y_train)
+print('K Nearest Neighbor')
+#Predict on test data
+PredictKNN = ClassifierKNN.predict(X_test)
+#Confusion Matrix
+confusionMatrixKNN = pd.crosstab(Y_test,PredictKNN, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix:\n',confusionMatrixKNN)
+#Checking the accuracy if prediction of test data is correct
+AccuracyKNN = metrics.accuracy_score(Y_test, PredictKNN)
+print ('Accuracy',AccuracyKNN)
+#Recall
+RecallKNN = metrics.recall_score(Y_test, PredictKNN)
+print ('Recall',RecallKNN)
+#Precision
+PrecisionKNN = metrics.precision_score(Y_test, PredictKNN)
+print ('Precision',PrecisionKNN)
+#F-score
+FscoreKNN = metrics.f1_score(Y_test, PredictKNN)
+print ('F-score',FscoreKNN)
+#Classification Technique 2
+print('Classification Technique 2 :')
+#Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+#Create the classifier
+ClassifierDecisionTree = DecisionTreeClassifier()
+#Train the classifier 
+ClassifierDecisionTree.fit(X_train,Y_train)
+print('Decision Tree')
+#Predict on test data
+PredictDecisionTree = ClassifierDecisionTree.predict(X_test)
+#Confusion Matrix
+confusionMatrixDecisionTree = pd.crosstab(Y_test,PredictDecisionTree, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix:\n',confusionMatrixDecisionTree)
+#Checking the accuracy if prediction of test data is correct
+from sklearn.metrics import accuracy_score
+AccuracyDecisionTree=metrics.accuracy_score(Y_test, PredictDecisionTree)
+print('Accuracy',AccuracyDecisionTree)
+#Recall
+from sklearn.metrics import recall_score
+RecallDecisionTree=metrics.recall_score(Y_test, PredictDecisionTree)
+print('Recall',RecallDecisionTree)
+#Precision
+from sklearn.metrics import precision_score
+PrecisionDecisionTree=metrics.precision_score(Y_test, PredictDecisionTree)
+print('Precision',PrecisionDecisionTree)
+#F-score
+from sklearn.metrics import f1_score
+FscoreDecisionTree=metrics.f1_score(Y_test, PredictDecisionTree)
+print('F-score',FscoreDecisionTree)
+#Classification Technique 3
+print('Classification Technique 3 : ')
+#Random Forest
+from sklearn.ensemble import RandomForestClassifier
+#Create the classifier
+ClassifierRandomForest = RandomForestClassifier()
+#Train the classifier 
+ClassifierRandomForest.fit(X_train,Y_train)
+print('Random Forest')
+#Predict on test data
+PredictRandomForest = ClassifierRandomForest.predict(X_test)
+#Confusion Matrix
+confusionMatrixRandomForest = pd.crosstab(Y_test,PredictRandomForest, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix',confusionMatrixRandomForest)
+#Checking the accuracy if prediction of test data is correct
+AccuracyRandomForest = metrics.accuracy_score(Y_test,PredictRandomForest)
+print('Accuracy',AccuracyRandomForest)
+#Recall
+RecallRandomForest = metrics.recall_score(Y_test,PredictRandomForest)
+print('Recall',RecallRandomForest)
+#Precision
+PrecisionRandomForest = metrics.precision_score(Y_test,PredictRandomForest)
+print('Precision',PrecisionRandomForest)
+#F-score
+FscoreRandomForest = metrics.f1_score(Y_test,PredictRandomForest)
+print('F-score',FscoreRandomForest)
+import warnings
+warnings.filterwarnings('ignore')
+#Classification Technique 4
+print('Classification Technique 4 : ')
+#Support Vector Machine
+from sklearn import svm
+#Create the Classifier
+ClassifierSVM = svm.SVC(C = 10, gamma = 0.1)
+#Train the Classifier 
+ClassifierSVM.fit(X_train,Y_train)
+print('Support Vector Machine')
+#Predict on test data
+PredictSVM = ClassifierSVM.predict(X_test)
+#Confusion Matrix
+from sklearn.metrics import confusion_matrix
+confusionMatrixSVM = pd.crosstab(Y_test,PredictSVM, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix:\n',confusionMatrixSVM)
+#Checking the accuracy if prediction of test data is correct
+AccuracySVM = accuracy_score(PredictSVM,Y_test)
+print('Accuracy',AccuracySVM)
+#Recall
+RecallSVM = recall_score(PredictSVM,Y_test)
+print('Recall',RecallSVM)
+#Precision
+PrecisionSVM = precision_score(PredictSVM,Y_test)
+print('Precision',PrecisionSVM)
+#F-score
+FscoreSVM = f1_score(PredictSVM,Y_test)
+print('F-score',FscoreSVM)
+#Classification Technique 5
+print('Classification Technique 5 : ')
+from sklearn.model_selection import cross_val_score
+from sklearn import svm
+#Define three different kernels
+kernels = ['sigmoid','poly']
+score = []
+print('Types of Function and the corresponding scores')
+for i in kernels:
+    clf = svm.SVC(kernel = i)
+    Accuracy = cross_val_score(clf,trainDataScaled,targetEncoded,cv = 15, scoring='accuracy')
+    score.append(Accuracy.mean())
+for i in range(len(kernels)):
+    print(kernels[i],':',score[i])
+import warnings
+warnings.filterwarnings('ignore')
+print('Score is maximum for poly function')
+score = []
+print('Value of C using cross validation and the corresponding scores for poly function')
+for i in range(10):
+    clf = svm.SVC(C = i+1,kernel='poly')
+    Accuracy = cross_val_score(clf,trainDataScaled,targetEncoded,cv = 15, scoring='accuracy')
+    score.append(Accuracy.mean())
+for i in range(10):
+    print('C =',i+1,', Score =',score[i])
+import warnings
+warnings.filterwarnings('ignore')
+print('Score is maximum when C is 8')
+score = [] 
+gamma_values = [0.0001,0.001,0.01,0.1,1.0,100.0,1000.0]
+print('Value of gamma using cross validation and the corresponding scores for rbf function')
+for i in gamma_values:
+    clf = svm.SVC(kernel='poly',gamma = i,C=8)
+    Accuracy = cross_val_score(clf,trainDataScaled,targetEncoded,cv = 15, scoring='accuracy')
+    score.append(Accuracy.mean())
+for i in range(len(gamma_values)):
+    print('gamma:',gamma_values[i],', Score:',score[i])
+print('Score is maximum when gamma is 0.1')
+#Create the classifier
+clf = svm.SVC(kernel='poly',C=8,gamma = 0.1)
+#Train the classifier 
+clf.fit(X_train,Y_train) 
+print('SVM Classifier with poly function ')
+#Predict on test data
+Predictclf = clf.predict(X_test)
+#Classification Matrix
+confusionMatrixclf = pd.crosstab(Y_test,Predictclf, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix:\n',confusionMatrixclf)
+#Checking the accuracy if prediction of test data is correct
+Accuracyclf = metrics.accuracy_score(Y_test, Predictclf)
+print ('Accuracy',Accuracyclf)
+#Recall
+Recallclf = metrics.recall_score(Y_test, Predictclf)
+print ('Recall',Recallclf)
+#Precision
+Precisionclf = metrics.precision_score(Y_test, Predictclf)
+print ('Precision',Precisionclf)
+#F-score
+Fscoreclf = metrics.f1_score(Y_test, Predictclf)
+print ('F-score',Recallclf)
+#Classification Technique 6
+print('Classification Technique 6 : ')
+#Gradient Boosting model
+from sklearn.ensemble import GradientBoostingClassifier
+#Create and train the classifier
+ClassifierGBC = GradientBoostingClassifier(random_state=0).fit(X_train,Y_train)
+print("Bagging Model")
+#Predict on test data
+PredictGBC = ClassifierGBC.predict(X_test)
+#Confusion Matrix
+confusionMatrixGBC = pd.crosstab(Y_test,PredictGBC, rownames=['Actual'], colnames=['Predicted'], margins=True)
+print('Confusion Matrix:\n',confusionMatrixGBC)
+#Checking the accuracy if prediction of test data is correct
+AccuracyGBC=metrics.accuracy_score(Y_test, PredictGBC)
+print('Accuracy',AccuracyGBC)
+#Recall
+RecallGBC=metrics.recall_score(Y_test, PredictGBC)
+print('Recall',RecallGBC)
+#Precision
+PrecisionGBC=metrics.precision_score(Y_test, PredictGBC)
+print('Precision',PrecisionGBC)
+#F-score
+FscoreGBC=metrics.f1_score(Y_test, PredictGBC)
+print('F-score',FscoreGBC)
+#Plot the features
+def plot_feature_importances_mydata(model):
+    n_features = trainDataScaled.shape[1]
+    plt.barh(range(n_features), model.feature_importances_, align='center')
+    plt.yticks(np.arange(n_features), list(voice))
+    plt.xlabel("Variable importance")
+    plt.ylabel("Independent Variable")
+#Gradient Boosting Classifier
+plot_feature_importances_mydata(ClassifierGBC)
+#Random Forest Classifier
+plot_feature_importances_mydata(ClassifierRandomForest)
+#Decision Tree Classifier
+plot_feature_importances_mydata(ClassifierDecisionTree)
