@@ -4,4 +4,4 @@ It is a python based project.
 It uses various machine learning techniques including random forest, decision tree, support vector machine and ada boost.
 Dateset used is "voice.csv" from https://www.kaggle.com/primaryobjects/voicegender#voice.csv.
 Code file contains the entire code of the project in python.
-Project Report file contains the report of the project which includes description of dataset, methodology, implementation, results and conclusion as well
+Project Report.pdf file contains the report of the project which includes description of dataset, methodology, implementation, results and conclusion as well.
